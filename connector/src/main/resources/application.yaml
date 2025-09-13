@@ -1,0 +1,29 @@
+server:
+  port: 8080
+spring:
+  application:
+    name: NexLLM connector
+  r2dbc:
+    pool:
+      enabled: true
+      initial-size: 10
+      max-size: 100
+      validation-query: "select 1"
+    url: r2dbc:postgresql://localhost:5432/nexllm
+    username: postgres
+    password: root
+logging:
+  level:
+    root: trace
+    org.springframework.security: trace
+nexllm:
+  auth:
+    baseUrl: http://localhost:8401
+  connector:
+    llm-provider:
+      base-url: http://localhost:9000
+  crypto:
+    enabled: true
+    type: "AES"
+    aes:
+      secret: "${SECRET}"

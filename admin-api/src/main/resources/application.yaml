@@ -1,0 +1,32 @@
+server:
+  port: 8100
+spring:
+  application:
+    name: NexLLM admin api
+  datasource:
+    url: jdbc:postgresql://localhost:5432/nexllm?options=-c%20TimeZone=UTC
+    username: postgres
+    password: root
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 2
+      idle-timeout: 60000
+      connection-timeout: 30000
+      pool-name: NexLLMHikariCP
+  jackson:
+    default-property-inclusion: non_null
+logging:
+  level:
+    root: debug
+
+nexllm:
+  auth:
+    baseUrl: http://localhost:8401
+  crypto:
+    enabled: true
+    type: "AES"
+    aes:
+      secret: "${SECRET}"
+  gateway:
+    base-url: http://localhost

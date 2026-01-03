@@ -1,108 +1,108 @@
 create table tenants
 (
-    id            serial primary key,
-    tenant_id     uuid        not null unique default gen_random_uuid(),
-    name          text        not null,
-    owner_user_id uuid        not null,
-    status        integer     not null        default 1, -- entity status
-    created_at    timestamptz not null        default current_timestamp,
-    updated_at    timestamptz not null        default current_timestamp
+    id         serial primary key,
+    tenant_id  uuid        not null unique default gen_random_uuid(),
+    owner_id   uuid        not null,
+    name       text        not null,
+    status     integer     not null        default 1, -- entity status
+    created_at timestamptz not null        default current_timestamp,
+    updated_at timestamptz not null
 );
 
 create table users
 (
     id           serial primary key,
-    user_id      uuid        not null unique default gen_random_uuid(),
     tenant_id    uuid        not null,
+    user_id      uuid        not null unique default gen_random_uuid(),
     username     text unique not null,
     password     text        not null,
     account_type text        not null        default 'MAIN', -- MAIN, SUB
     roles        text[]      not null,
     status       integer     not null        default 1,
     created_at   timestamptz not null        default current_timestamp,
-    updated_at   timestamptz not null        default current_timestamp
+    updated_at   timestamptz not null
 );
 
 create table virtual_keys
 (
     id             serial primary key,
-    user_id        uuid        not null,
     tenant_id      uuid        not null,
+    owner_id       uuid        not null,
     virtual_key_id uuid        not null unique default gen_random_uuid(),
     key_hash       text        not null,
     name           text        not null,
-    allowed_models text[],
+    allowed_models uuid[],
     status         integer     not null        default 1,
     expire_at      timestamptz,
     created_at     timestamptz not null        default current_timestamp,
-    updated_at     timestamptz not null        default current_timestamp
+    updated_at     timestamptz not null
 );
 
 create table virtual_models
 (
     id               serial primary key,
-    user_id          uuid        not null,
     tenant_id        uuid        not null,
+    owner_id         uuid        not null,
     virtual_model_id uuid        not null unique default gen_random_uuid(),
-    name             text        not null unique, -- e.g. 'vm:gpt-4', 'vm:embedding'
+    name             text        not null, -- e.g. 'vm:gpt-4', 'vm:embedding'
     description      text,
     enabled          boolean     not null        default true,
     created_at       timestamptz not null        default current_timestamp,
-    updated_at       timestamptz not null        default current_timestamp
+    updated_at       timestamptz not null,
+    unique (tenant_id, name)
 );
 create table virtual_model_mappings
 (
-    id               serial primary key,
-    user_id          uuid    not null,
-    tenant_id        uuid    not null,
-    virtual_model_id uuid    not null,
-    model_id         uuid    not null, -- maps to llm_models.model_id
-    priority         integer not null default 0,
-    weight           integer not null default 1,
-    unique (virtual_model_id, model_id)
+    id                serial primary key,
+    tenant_id         uuid    not null,
+    owner_id          uuid    not null,
+    virtual_model_id  uuid    not null,
+    provider_model_id uuid    not null, -- maps to models.model_id
+    priority          integer not null default 0,
+    weight            integer not null default 1,
+    unique (virtual_model_id, provider_model_id)
 );
 
-
-create table llm_providers
+create table providers
 (
-    id               serial primary key,
-    user_id          uuid        not null, -- system when system=true
-    tenant_id        uuid        not null, -- system when system=true
-    provider_id      uuid        not null unique default gen_random_uuid(),
-    name             text        not null unique,
-    base_url         text        not null,
-    description      text        null,
-    sdk_client_class text        not null        default 'openai',
-    system           boolean     not null        default true,
-    enabled          boolean     not null        default true,
-    extra_config     jsonb,
-    created_at       timestamptz not null        default now(),
-    updated_at       timestamptz not null        default now()
+    id            serial primary key,
+    tenant_id     uuid        not null,                         -- system when system=true
+    owner_id      uuid        not null,
+    owner_type    text        not null        default 'system', -- user or system
+    provider_id   uuid        not null unique default gen_random_uuid(),
+    name          text        not null unique,
+    base_url      text        not null,
+    description   text        null,
+    provider_type text        not null        default 'openai',
+    enabled       boolean     not null        default true,
+    extra_config  jsonb,
+    created_at    timestamptz not null        default current_timestamp,
+    updated_at    timestamptz not null
 );
 
-create table llm_provider_keys
+create table provider_keys
 (
     id              serial primary key,
-    user_id         uuid        not null,
     tenant_id       uuid        not null,
-    provider_key_id uuid        not null unique default gen_random_uuid(),
+    owner_id        uuid        not null,
     provider_id     uuid        not null,
-    key_enc         text        not null,
+    provider_key_id uuid        not null unique default gen_random_uuid(),
+    key_enc         jsonb       not null,
     name            text        not null unique,
     priority        integer     not null        default 0,
     enabled         boolean     not null        default true,
     description     text,
-    created_at      timestamptz not null        default now(),
-    updated_at      timestamptz not null        default now()
+    created_at      timestamptz not null        default current_timestamp,
+    updated_at      timestamptz not null        default current_timestamp
 );
 
-create table llm_models
+create table provider_models
 (
     id                serial primary key,
-    user_id           uuid        not null,
     tenant_id         uuid        not null,
-    model_id          uuid        not null unique default gen_random_uuid(),
+    owner_id          uuid        not null,
     provider_id       uuid        not null,
+    provider_model_id uuid        not null unique default gen_random_uuid(),
     name              text        not null,
     description       text        null,
     features          text[]      not null, -- chat, embedding, vision, audio_transcription, audio_generation, tool_calling, response_format
@@ -112,34 +112,35 @@ create table llm_models
     status            text        not null        default 'HEALTHY',
     default_params    jsonb,-- top_n ...
     last_checked_at   timestamptz,
-    created_at        timestamptz not null        default now(),
-    updated_at        timestamptz not null        default now(),
+    created_at        timestamptz not null        default current_timestamp,
+    updated_at        timestamptz not null        default current_timestamp,
     unique (provider_id, name)
 );
 
 
-create table llm_model_pricing
+create table provider_model_pricing
 (
-    id             serial primary key,
-    user_id        uuid           not null,
-    tenant_id      uuid           not null,
-    model_id       uuid           not null,
-    modality       text           not null, -- 'text', 'image', 'audio', etc.
-    usage_unit     text           not null, -- e.g. 'tokens', 'seconds', 'image_1024x1024', 'bytes'
-    price_per_unit numeric(10, 6) not null, -- usd
-    currency       text        default 'usd',
-    effective_from timestamptz default now()
+    id                serial primary key,
+    tenant_id         uuid           not null,
+    owner_id          uuid           not null,
+    provider_id       uuid           not null,
+    provider_model_id uuid           not null,
+    modality          text           not null, -- 'text', 'image', 'audio', etc.
+    usage_unit        text           not null, -- e.g. 'tokens', 'seconds', 'image_1024x1024', 'bytes'
+    price_per_unit    numeric(10, 6) not null, -- usd
+    currency          text        default 'usd',
+    effective_from    timestamptz default current_timestamp,
+    unique (provider_model_id, modality, usage_unit, effective_from)
 );
 
-create table llm_logs
+create table request_logs
 (
     id                bigserial primary key,
-    user_id           uuid    not null,
     tenant_id         uuid    not null,
-    llm_key_id        uuid    not null,
-    model_id          uuid    not null,
+    provider_key_id   uuid    not null,
+    provider_model_id uuid    not null,
     virtual_model_id  uuid    not null,
-    api_key_id        uuid    not null,
+    virtual_key_id    uuid    not null,
     end_user_id       text    null,
 
     prompt_tokens     integer not null,
@@ -167,28 +168,28 @@ create table llm_logs
     duration_ms       integer not null default 0,
 
     cost              double precision,
-    created_at        timestamptz      default now()
+    created_at        timestamptz      default current_timestamp
 );
 
 create table rate_limits
 (
     id          serial primary key,
-    user_id     uuid    not null,
-    tenant_id   uuid    not null,
-    target_type text    not null check (target_type in ('user', 'llm_key', 'api_key', 'model')),
-    target_id   uuid    not null,
+    tenant_id   uuid      not null,
+    owner_id    uuid      not null,
+    target_type text      not null check (target_type in ('user', 'provider_key', 'virtual_key', 'model')),
+    target_id   uuid      not null,
 
-    window_type text    not null default 'fixed', -- fixed, sliding
+    window_type text      not null default 'fixed', -- fixed, sliding
 
-    window_unit text    not null check (window_unit in ('second', 'minute', 'hour', 'day')),
-    window_size integer not null,                 -- eg: 10 seconds, 1 hour, 1 day
+    window_unit text      not null check (window_unit in ('second', 'minute', 'hour', 'day')),
+    window_size integer   not null,                 -- eg: 10 seconds, 1 hour, 1 day
 
-    rpm         integer,                          -- rpm/rph
-    max_tokens  integer,                          -- tpm/tph
-    max_budget  decimal(10, 4),                   -- cost usd
+    rpm         integer,                            -- rpm/rph
+    max_tokens  integer,                            -- tpm/tph
+    max_budget  decimal(10, 4),                     -- cost usd
 
     description text,
 
-    created_at  timestamp        default current_timestamp,
-    updated_at  timestamp        default current_timestamp
+    created_at  timestamp not null default current_timestamp,
+    updated_at  timestamp not null
 );

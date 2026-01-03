@@ -11,8 +11,8 @@ import org.springframework.data.relational.core.mapping.Table;
 public record RateLimitEntity(
     @Id
     Long id,
-    UUID userId,
     UUID tenantId,
+    UUID ownerId,
     String targetType,
     UUID targetId,
     String windowType,

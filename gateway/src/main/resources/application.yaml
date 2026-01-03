@@ -1,0 +1,52 @@
+server:
+  port: 8080
+spring:
+  application:
+    name: NexLLM connector
+  r2dbc:
+    pool:
+      enabled: true
+      initial-size: 10
+      max-size: 100
+      validation-query: "select 1"
+    url: r2dbc:postgresql://localhost:5432/nexllm
+    username: postgres
+    password: root
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password: redis123
+      database: 0
+      timeout: 5s
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 1
+logging:
+  level:
+    root: trace
+    org.springframework.security: trace
+nexllm:
+  auth:
+    public-key: |
+      -----BEGIN PUBLIC KEY-----
+      MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAmdbL4f7HhQbh76rKXIUB
+      D080TIM8oUjVE+G/aTrAfwhVAo/UsEKhjwjHo6w7b8fqEdGBH9DWpoPVWNdb8tjK
+      1ugtB6YuyP5i5U9WEKl7JJsca69CF/M1Q2+gXal1+x+tb1T3iVa7CZq/tX695f0L
+      UrBZ2yaWCwM+cXalnU/xOks1UUmenGDryNLOsjnzIUJZ+6DH+NL/LRvBEZissxvB
+      xfoedF25h8HfSS0rZ52gP6UEw/tmwAJ4Y2HjMAD9mGm5w6qpkCe3MFuOHuug2Yhy
+      61ljQyFe6la0krGrVX5szRGidghzauOCZUXVDzsphLL38hCRq6bS7r+Saj9RG+Ka
+      wQIDAQAB
+      -----END PUBLIC KEY-----
+  crypto:
+    enabled: true
+    type: "AES"
+    aes:
+      secret: "${SECRET}"

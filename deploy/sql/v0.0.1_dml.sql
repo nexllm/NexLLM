@@ -1,0 +1,11 @@
+INSERT INTO public.users (id, user_id, tenant_id, username, password, account_type, roles, status, created_at,
+                          updated_at)
+VALUES (1, 'f680f287-ffdc-4d3d-9b8f-eb14940f0404', 'c6862ce0-2c08-4a5b-87f6-35c333c508ea', 'heyuxian',
+        '$2a$10$/FZ6PGdYNdf93af8XwC/j.SvYDH.dDZmvY9N7qb4L5FaoIsz/v6XC', 'MAIN', '{ROLE_ADMIN}', 1,
+        '2025-06-18 11:43:33.248922 +00:00', '2025-06-18 11:43:33.248922 +00:00');
+INSERT INTO public.tenants (id, tenant_id, name, owner_user_id, status, created_at, updated_at) VALUES (1, '4bf36983-e239-4d5c-85fa-0022575336c1', 'heyuxian', 'f680f287-ffdc-4d3d-9b8f-eb14940f0404', 1, '2025-06-18 11:43:32.594765 +00:00', '2025-06-18 11:43:32.594765 +00:00');
+
+
+INSERT INTO public.llm_providers (id, user_id, tenant_id, provider_id, name, base_url, description, sdk_client_class, system, enabled, extra_config, created_at, updated_at) VALUES (2, '6900b60d-192f-44a8-85c1-c85155d2fa36', 'c6862ce0-2c08-4a5b-87f6-35c333c508ea', 'f5756a27-c4e1-40c4-af99-090fb12ac4c5', 'AliYun', 'https://dashscope.aliyuncs.com/compatible-mode', null, 'openai', true, true, null, '2025-06-10 13:36:57.532474 +00:00', '2025-06-10 13:36:57.532474 +00:00');
+INSERT INTO public.llm_provider_keys (id, user_id, tenant_id, provider_key_id, provider_id, key_enc, name, priority, enabled, description, created_at, updated_at) VALUES (6, 'f680f287-ffdc-4d3d-9b8f-eb14940f0404', 'c6862ce0-2c08-4a5b-87f6-35c333c508ea', '54640a4d-ca9b-43ad-8ffc-5986068b5c49', 'f5756a27-c4e1-40c4-af99-090fb12ac4c5', 'E/RSuMyvxvYC1fdYFeNL/AaXkhHZjGbbrWt3dibFDz2AbQQl0ZnKMZP1nh8AIIcEAD+x4Xn22lDIooMmdhgAAA==', 'Docs4dev', 10, true, null, '2025-07-23 12:33:31.628894 +00:00', '2025-07-23 12:33:31.628894 +00:00');
+INSERT INTO public.llm_models (id, user_id, tenant_id, model_id, provider_id, name, description, features, context_length, max_output_tokens, enabled, status, default_params, last_checked_at, created_at, updated_at) VALUES (2, '6900b60d-192f-44a8-85c1-c85155d2fa36', 'c6862ce0-2c08-4a5b-87f6-35c333c508ea', 'd87e33fb-d122-4d9b-8a7b-d8f713deecf4', 'f5756a27-c4e1-40c4-af99-090fb12ac4c5', 'qwen-turbo-latest', null, '{COMPLETION,CHAT}', 0, 0, true, 'PENDING', null, null, '2025-06-10 13:37:11.534064 +00:00', '2025-06-10 13:37:11.534064 +00:00');

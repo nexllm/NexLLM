@@ -1,0 +1,46 @@
+{
+  "type": "record",
+  "name": "ApiKeyUpsertedEvent",
+  "namespace": "io.github.nexllm.infra.kafka.events",
+  "doc": "API Key upserted",
+  "fields": [
+    {
+      "name": "tenantId",
+      "type": {
+        "type": "string",
+        "logicalType": "uuid"
+      },
+      "doc": "tenantId"
+    },
+    {
+      "name": "userId",
+      "type": {
+        "type": "string",
+        "logicalType": "uuid"
+      },
+      "doc": "userId"
+    },
+    {
+      "name": "username",
+      "type": "string",
+      "doc": "username"
+    },
+    {
+      "name": "roles",
+      "type": {
+        "type": "array",
+        "items": "string"
+      },
+      "doc": "roles"
+    },
+    {
+      "name": "status",
+      "type": [
+        "null",
+        "int"
+      ],
+      "default": null,
+      "doc": "status"
+    }
+  ]
+}

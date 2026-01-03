@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  minio:
+    image: quay.io/minio/minio:latest # Use the recommended quay.io image
+    ports:
+      - "9000:9000" # MinIO API and Web UI port
+      - "9001:9090" # MinIO Console port
+    environment:
+      # Set your desired credentials (default is minioadmin/minioadmin)
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    volumes:
+      # Persist data to a local directory
+      - ~/data/minio:/data
+    command: server /data --console-address :9090 # Start the server and specify the console port
+    restart: always

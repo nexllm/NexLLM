@@ -1,0 +1,26 @@
+bootstrap_servers: "localhost:9094"
+schema_registry_url: "http://localhost:8081"
+
+codegen:
+  java:
+    package: "io.github.nexllm.infra.kafka.constant"
+    output_dir: "../infra-kafka/src/main/java"
+    class_name: "KafkaTopics"
+  python:
+    output_file: "../python-common/kafka_constants.py"
+    class_name: "KafkaTopics"
+topics:
+  - name: "iam.user.events"
+    partitions: 3
+    replication: 3
+    schema_file: "../../schemas/kafka/iam/apikey/changed.avsc"
+    compatibility: "BACKWARD"
+    replication_factor: 3
+    configs:
+      retention.ms: "604800000" # 7days
+  - name: "iam.api-key.deleted"
+    partitions: 3
+    replication: 3
+    replication_factor: 3
+    schema_file: "../../schemas/kafka/iam/apikey/deleted.avsc"
+    compatibility: "BACKWARD"
